@@ -2,7 +2,9 @@ from functools import cached_property
 from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qsl, urlparse
+import redis
 
+r = redis.Redis(host='localhost', port=6379, db=0)
 # Código basado en:
 # https://realpython.com/python-http-server/
 # https://docs.python.org/3/library/http.server.html
@@ -33,20 +35,26 @@ class WebRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.send_response(200)
-        self.send_header("Content-Type", "text/html")
+        self.send_header("Content-Type", "text/html; charset=utf-8")
         self.end_headers()
-        self.wfile.write(self.get_response().encode("utf-8"))
+        books = None
+    #busqueda de libros
+        if self.query_data and 'q' in self.query_data:
+            books = r.sinter(self.query_data['q'].split(' '))
+        self.wfile.write(self.get_response(books).encode("utf-8"))
 
-    def get_response(self):
-        return f"""
-    <h1> Hola Web </h1>
-    <p>  {self.path}         </p>
-    <p>  {self.headers}      </p>
-    <p>  {self.cookies}      </p>
+    def get_response(self, books):
+        return f"""    
+    <h1> BUSCADOR DE LIBROS </h1>
+    <form action="/" method="get">
+        <label for= "q"> Búsqueda</label>
+        <input type="text" name="q" required/>
+    </form>
+
     <p>  {self.query_data}   </p>
+    <p> {books}      </p>
 """
-
-
+ 
 if __name__ == "__main__":
     print("Server starting...")
     server = HTTPServer(("0.0.0.0", 8000), WebRequestHandler)
