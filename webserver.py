@@ -44,16 +44,23 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(self.get_response(books).encode("utf-8"))
 
     def get_response(self, books):
+        books_info = []
+        if books:
+            for book_id in books:
+                html = r.get(book_id).decode('utf-8')
+                books_info.append(f"Libro {book_id}")
         return f"""    
     <h1> BUSCADOR DE LIBROS </h1>
-    <form action="/" method="get">
-        <label for= "q"> Búsqueda</label>
-        <input type="text" name="q" required/>
-    </form>
-
-    <p>  {self.query_data}   </p>
-    <p> {books}      </p>
-"""
+        <form action="/" method="get">
+            <label for="q">Buscar </label>
+            <input type="text" name="q" required/>
+        </form>
+        <p>Palabra(s) buscada(s): {self.query_data.get('q', '')}</p>
+        <p>Libro donde se encuentra: </p>
+        <ul>
+            {"".join(f'<li>{info}</li>' for info in books_info)}
+        </ul>
+    """
  
 if __name__ == "__main__":
     print("Server starting...")
