@@ -55,7 +55,7 @@ class WebRequestHandler(BaseHTTPRequestHandler):
             <label for="q">Buscar </label>
             <input type="text" name="q" required/>
         </form>
-        <p>Palabra(s) buscada(s): {self.query_data.get('q', '')}</p>
+        <p>Palabra buscada: {self.query_data.get('q', '')}</p>
         <p>Libro donde se encuentra: </p>
         <ul>
             {"".join(f'<li>{info}</li>' for info in books_info)}
